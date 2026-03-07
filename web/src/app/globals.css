@@ -1,0 +1,41 @@
+@import "tailwindcss";
+
+@theme {
+  --color-background: #FFFFFF;
+  --color-foreground: #0F172A;
+  /* Slate 900 (Casi Negro) */
+  --color-muted: #64748B;
+  /* Slate 500 */
+  --color-surface: #F8FAFC;
+  /* Slate 50 */
+  --color-primary: #2563EB;
+  /* Blue 600 (Confianza/B2B) */
+  --color-border: #E2E8F0;
+  /* Slate 200 */
+
+  --radius-card: 16px;
+  /* Más redondeado y premium */
+  --radius-button: 8px;
+  --radius-input: 8px;
+
+  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, SFMono-Regular, monospace;
+}
+
+:root {
+  color-scheme: light;
+}
+
+body {
+  background-color: var(--color-background);
+  color: var(--color-foreground);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+}
