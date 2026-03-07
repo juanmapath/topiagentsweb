@@ -10,7 +10,8 @@ export function Hero() {
 
     useEffect(() => {
         let isMounted = true;
-        fetch("http://127.0.0.1:8000/api/ui/landing/hero/")
+        const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000";
+        fetch(`${API_URL}/api/ui/landing/hero/`)
             .then(res => res.ok ? res.json() : null)
             .then(resData => {
                 if (isMounted) setData(resData);
@@ -19,7 +20,8 @@ export function Hero() {
         return () => { isMounted = false; };
     }, []);
 
-    const endpoint = "http://127.0.0.1:8000/api/ui/landing/hero/";
+    const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000";
+    const endpoint = `${API_URL}/api/ui/landing/hero/`;
 
     const headline = data?.headline || "Deja de Quemar Dinero en Tareas que un Agente Inteligente Puede Hacer (GRATIS) Mientras Duermes.";
     const subheadline = data?.subheadline || "TopIAgents construye sistemas invisibles que responden a tus leads en segundos, leen tus documentos y llenan tu agenda 24/7. Sin contratar más personal. Sin tocar una sola línea de código.";

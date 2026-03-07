@@ -25,7 +25,8 @@ export function ValueLadderOffer() {
 
     useEffect(() => {
         let isMounted = true;
-        fetch("http://127.0.0.1:8000/api/ui/landing/value-ladder/")
+        const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000";
+        fetch(`${API_URL}/api/ui/landing/value-ladder/`)
             .then(res => res.ok ? res.json() : null)
             .then(resData => {
                 if (isMounted) setData(resData);
@@ -34,7 +35,8 @@ export function ValueLadderOffer() {
         return () => { isMounted = false; };
     }, []);
 
-    const endpoint = "http://127.0.0.1:8000/api/ui/landing/value-ladder/";
+    const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000";
+    const endpoint = `${API_URL}/api/ui/landing/value-ladder/`;
 
     const title = data?.title || "Dos formas de recuperar tu tiempo. Tú eliges.";
     const subtitle = data?.subtitle || "Hacerlo con nosotros es la única opción lógica para no quedarte atrás.";
