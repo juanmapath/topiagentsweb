@@ -116,6 +116,35 @@ export function BookingModal({ isOpen, onClose, sourcePlan, planName, hideTasksF
 
             if (!res.ok) throw new Error("Error al procesar la reserva");
 
+            // --- TRACKING LEAD CREATION ---
+            try {
+                const sessionId = localStorage.getItem('visitor_session_id');
+                const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+                
+                await fetch(`${API_URL}/api/analytics/lead/`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        first_name: name.split(' ')[0],
+                        last_name: name.split(' ').slice(1).join(' '),
+                        email: email,
+                        phone: whatsapp || null,
+                        company: website || null,
+                        session_id: sessionId,
+                        utm_source: sessionStorage.getItem('utm_source'),
+                        utm_medium: sessionStorage.getItem('utm_medium'),
+                        utm_campaign: sessionStorage.getItem('utm_campaign'),
+                        utm_term: sessionStorage.getItem('utm_term'),
+                        utm_content: sessionStorage.getItem('utm_content'),
+                        landing_page: window.location.href,
+                        form_name: `Booking Modal (${sourcePlan})`
+                    })
+                });
+            } catch (trackingErr) {
+                console.error("Tracking lead creation failed, but booking succeeded:", trackingErr);
+            }
+            // ------------------------------
+
             setIsSuccess(true);
             setTimeout(() => {
                 onClose();

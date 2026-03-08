@@ -4,6 +4,7 @@ import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/Button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/Card"
 import Link from "next/link"
+import { BookingModal } from "@/components/landing/BookingModal"
 
 // Tipos basados en la respuesta de la API de Django
 interface Tag {
@@ -48,6 +49,29 @@ export function SolutionCatalog() {
     const [searchQuery, setSearchQuery] = useState("")
     const [isLoading, setIsLoading] = useState(true)
 
+    // Booking Modal State
+    const [isBookingOpen, setIsBookingOpen] = useState(false);
+    const [sourcePlan, setSourcePlan] = useState<"option1" | "option2" | null>(null);
+    const [planName, setPlanName] = useState<string>("");
+    const [bookingInitialTasks, setBookingInitialTasks] = useState<string>("");
+
+    // Carousel Modal State
+    const [selectedProduct, setSelectedProduct] = useState<SystemProduct | null>(null);
+
+    const handleOpenBooking = (plan: "option1" | "option2", name: string, initialTasks: string = "") => {
+        setSourcePlan(plan);
+        setPlanName(name);
+        setBookingInitialTasks(initialTasks);
+        setIsBookingOpen(true);
+    };
+
+    const getMediaUrl = (path: string | null) => {
+        if (!path) return "";
+        if (path.startsWith("http")) return path;
+        const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000";
+        return path.startsWith("/") ? `${API_URL}${path}` : `${API_URL}/${path}`;
+    };
+
     useEffect(() => {
         async function fetchProducts() {
             try {
@@ -83,6 +107,70 @@ export function SolutionCatalog() {
 
     return (
         <section id="catalogo" className="py-24 bg-background">
+            <BookingModal 
+                isOpen={isBookingOpen} 
+                onClose={() => setIsBookingOpen(false)} 
+                sourcePlan={sourcePlan} 
+                planName={planName}
+                hideTasksField={true}
+                initialTasks={bookingInitialTasks}
+            />
+            
+            {/* Media Carousel Modal */}
+            {selectedProduct && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4" onClick={() => setSelectedProduct(null)}>
+                    <div className="relative w-full max-w-5xl bg-surface border border-border rounded-xl shadow-2xl" onClick={e => e.stopPropagation()}>
+                        <Button
+                            variant="ghost"
+                            size="icon"
+                            className="absolute top-4 right-4 z-10 bg-black/50 hover:bg-black text-white rounded-full cursor-pointer"
+                            onClick={() => setSelectedProduct(null)}
+                        >
+                            <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                        </Button>
+                        
+                        <div className="p-6">
+                            <h2 className="text-2xl font-bold mb-6 text-foreground pr-10">{selectedProduct.title}</h2>
+                            
+                            <div className="flex overflow-x-auto gap-6 snap-x snap-mandatory pb-4 hide-scrollbar">
+                                {selectedProduct.media.length > 0 ? (
+                                    [...selectedProduct.media].sort((a, b) => a.order - b.order).map(m => (
+                                        <div key={m.id} className="snap-center shrink-0 w-full md:w-[85%] lg:w-[75%] aspect-video bg-zinc-900 rounded-xl overflow-hidden flex items-center justify-center border border-border/50 shadow-inner">
+                                            {m.is_video ? (
+                                                <video 
+                                                    src={getMediaUrl(m.file || m.url)} 
+                                                    controls 
+                                                    className="w-full h-full object-contain"
+                                                    autoPlay={false}
+                                                />
+                                            ) : (
+                                                <img 
+                                                    src={getMediaUrl(m.file || m.url)} 
+                                                    alt={selectedProduct.title} 
+                                                    className="w-full h-full object-contain"
+                                                />
+                                            )}
+                                        </div>
+                                    ))
+                                ) : (
+                                    <div className="w-full py-20 text-center text-muted border border-dashed border-border rounded-xl">
+                                        No hay medios disponibles para este sistema.
+                                    </div>
+                                )}
+                            </div>
+                            
+                            {selectedProduct.media.length > 1 && (
+                                <div className="text-center flex justify-center items-center gap-2 text-sm text-primary mt-4 font-medium animate-pulse">
+                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+                                    Desliza horizontalmente para ver la galería completa
+                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                </div>
+            )}
+
             <div className="container mx-auto max-w-6xl px-4">
                 <div className="text-center mb-12">
                     <h1 className="text-3xl font-bold tracking-tight md:text-5xl mb-4">
@@ -136,7 +224,11 @@ export function SolutionCatalog() {
                                 const firstMedia = template.media.length > 0 ? template.media[0] : null;
 
                                 return (
-                                    <Card key={template.id} className="flex flex-col relative overflow-hidden group bg-surface border-border hover:border-primary/50 transition-colors">
+                                    <Card 
+                                        key={template.id} 
+                                        className="flex flex-col relative overflow-hidden group bg-surface border-border hover:border-primary/50 transition-colors cursor-pointer"
+                                        onClick={() => setSelectedProduct(template)}
+                                    >
 
                                         {/* Etiqueta de Promoción Automática */}
                                         {hasPromo && (
@@ -149,12 +241,23 @@ export function SolutionCatalog() {
                                         <div className="relative h-48 w-full bg-zinc-200 overflow-hidden border-b border-border/50 group-hover:border-primary/30 transition-colors">
                                             <div className="absolute inset-0 bg-gradient-to-t from-surface via-transparent to-transparent z-10" />
                                             {firstMedia?.is_video ? (
-                                                <div className="w-full h-full flex items-center justify-center bg-zinc-200 text-muted group-hover:scale-105 transition-transform duration-500">
-                                                    <svg className="w-12 h-12 opacity-50" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"></path><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                                <div className="w-full h-full flex items-center justify-center bg-zinc-200 text-muted group-hover:scale-105 transition-transform duration-500 relative">
+                                                    {(firstMedia.file || firstMedia.url) && (
+                                                        <video 
+                                                            src={getMediaUrl(firstMedia.file || firstMedia.url)} 
+                                                            className="w-full h-full object-cover absolute inset-0 opacity-50"
+                                                            muted
+                                                            playsInline
+                                                        />
+                                                    )}
+                                                    <svg className="w-12 h-12 opacity-80 z-20 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"></path><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                                                 </div>
                                             ) : (
-                                                <div className="w-full h-full flex items-center justify-center bg-zinc-200 group-hover:scale-105 transition-transform duration-500" style={firstMedia?.file ? { backgroundImage: `url(${firstMedia.file})`, backgroundSize: 'cover', backgroundPosition: 'center' } : {}}>
-                                                    {!firstMedia?.file && <div className="w-full h-full bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-zinc-300 to-zinc-200 opacity-80" />}
+                                                <div 
+                                                    className="w-full h-full flex items-center justify-center bg-zinc-200 group-hover:scale-105 transition-transform duration-500" 
+                                                    style={(firstMedia?.file || firstMedia?.url) ? { backgroundImage: `url(${getMediaUrl(firstMedia.file || firstMedia.url)})`, backgroundSize: 'cover', backgroundPosition: 'center' } : {}}
+                                                >
+                                                    {!(firstMedia?.file || firstMedia?.url) && <div className="w-full h-full bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-zinc-300 to-zinc-200 opacity-80" />}
                                                 </div>
                                             )}
                                         </div>
@@ -201,11 +304,20 @@ export function SolutionCatalog() {
                                                 </div>
                                             </div>
 
-                                            <Link href={`/product/${template.slug}`} passHref className="w-full">
-                                                <Button variant="default" className="w-full font-bold h-12 text-base">
-                                                    Ver Detalles & Demo
-                                                </Button>
-                                            </Link>
+                                            <Button 
+                                                variant="default" 
+                                                className="w-full font-bold h-12 text-base cursor-pointer"
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    handleOpenBooking(
+                                                        "option2", 
+                                                        `${template.title} ($${Math.floor(parseFloat(template.price))})`,
+                                                        `${template.title} - ${template.description}` // Pre-llenar el campo de tareas para el modal
+                                                    );
+                                                }}
+                                            >
+                                                Contratar trabajador
+                                            </Button>
                                         </CardFooter>
                                     </Card>
                                 )

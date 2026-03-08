@@ -23,10 +23,10 @@ export function Hero() {
     const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000";
     const endpoint = `${API_URL}/api/ui/landing/hero/`;
 
-    const headline = data?.headline || "Deja de Quemar Dinero en Tareas que un Agente Inteligente Puede Hacer (GRATIS) Mientras Duermes.";
+    const headline = data?.headline || "Estás perdiendo clientes por culpa del trabajo manual. Te instalamos un empleado digital que no duerme en 48 horas.";
     const subheadline = data?.subheadline || "TopIAgents construye sistemas invisibles que responden a tus leads en segundos, leen tus documentos y llenan tu agenda 24/7. Sin contratar más personal. Sin tocar una sola línea de código.";
-    const primaryBtnText = data?.primary_btn_text || "Ver el Catálogo de Sistemas"; // Retained original primaryBtnText as the provided line was syntactically incorrect and ambiguous.
-    const primaryBtnLink = data?.primary_btn_link || "/catalogo";
+    const primaryBtnText = data?.primary_btn_text || "Contratar Empleabots"; // Retained original primaryBtnText as the provided line was syntactically incorrect and ambiguous.
+    const primaryBtnLink = data?.primary_btn_link || "/#oferta";
     const secondaryBtnText = data?.secondary_btn_text || "Calcular mi pérdida mensual";
     const secondaryBtnLink = data?.secondary_btn_link || "/#calculadora";
 

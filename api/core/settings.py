@@ -55,6 +55,7 @@ INSTALLED_APPS = [
     'apps.users',
     'apps.catalog',
     'apps.ui',
+    'apps.analytics',
 ]
 
 MIDDLEWARE = [
@@ -159,9 +160,9 @@ MEDIA_ROOT = BASE_DIR / 'media'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 CORS_ALLOW_ALL_ORIGINS = os.environ.get('CORS_ALLOW_ALL_ORIGINS', 'True') == 'True'
-CORS_ALLOWED_ORIGINS = os.environ.get('CORS_ALLOWED_ORIGINS', '').split(',')
+CORS_ALLOWED_ORIGINS = [url.strip() for url in os.environ.get('CORS_ALLOWED_ORIGINS', '').split(',') if url.strip()]
 
-CSRF_TRUSTED_ORIGINS = os.environ.get('CSRF_TRUSTED_ORIGINS', '').split(',')
+CSRF_TRUSTED_ORIGINS = [url.strip() for url in os.environ.get('CSRF_TRUSTED_ORIGINS', '').split(',') if url.strip()]
 # Especialmente necesario si sirves HTTPS detrás de un proxy/load balancer (como Coolify/Traefik)
 if os.environ.get('USE_SECURE_PROXY_SSL_HEADER', 'False') == 'True':
     SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
