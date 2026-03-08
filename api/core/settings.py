@@ -93,7 +93,7 @@ WSGI_APPLICATION = 'core.wsgi.application'
 # Database
 # Use el sqlite por defecto o los datos de conexión PostgreSQL/MySQL desde el .env
 DB_ENGINE = os.environ.get('DB_ENGINE', 'django.db.backends.sqlite3')
-DB_NAME = os.environ.get('DB_NAME', str(BASE_DIR / 'db.sqlite3'))
+DB_NAME = os.environ.get('DB_NAME', str(BASE_DIR / 'data' / 'db.sqlite3'))
 DB_USER = os.environ.get('DB_USER', '')
 DB_PASSWORD = os.environ.get('DB_PASSWORD', '')
 DB_HOST = os.environ.get('DB_HOST', '')
